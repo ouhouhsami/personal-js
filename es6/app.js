@@ -120,11 +120,11 @@ class App {
 
         conn.on('data', this.peerMasterDataListener.bind(this)(conn, this))
 
-        conn.on('close', ()=> {
-            console.log('CLOSE')
-            $peer.value = "";
-            document.location.reload();
-        })
+        // conn.on('close', ()=> {
+        //     console.log('CLOSE')
+        //     $peer.value = "";
+        //     document.location.reload();
+        // })
     }
 
     peerMasterDataListener(conn, that) {
