@@ -1,6 +1,5 @@
-
-var wavesAudio = require('waves-audio');
-var audioContext = wavesAudio.audioContext;
+let wavesAudio = require('waves-audio');
+let audioContext = wavesAudio.audioContext;
 
 export function loadSample(url){
     return new Promise(function(resolve, reject){
