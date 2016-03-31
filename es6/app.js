@@ -8,6 +8,7 @@ const audioContext = wavesAudio.audioContext;
 // Screens
 const $connectScreen = document.querySelector('#connect');
 const $playScreen = document.querySelector('#play');
+const $latency = document.querySelector('#latency');
 $connectScreen.style.display = "none";
 $playScreen.style.display = "none";
 
@@ -111,7 +112,7 @@ class SamplePlayer {
         source.loop = true;
         source.connect(audioContext.destination);
         source.buffer = this.currentAudioBuffer;
-
+        console.log("this.offset and latency", this.offset)
         source.start(0, this.offset);
         // pretty display
         let $allSamples = document.querySelectorAll('.sample');
@@ -123,6 +124,8 @@ class SamplePlayer {
     }
     get offset(){
         let offset = 0;
+        let latency = parseInt($latency.value)/1000;
+        console.log(latency);
         if(this.peerContext.type == 'master'){
             if (!this.syncTimeBegin) {
                 this.syncTimeBegin = audioContext.currentTime;
@@ -142,7 +145,11 @@ class SamplePlayer {
             let lastBeginTime = syncTimeBeginFromMaster + nbLoop *  this.currentAudioBuffer.duration;
             offset = syncTime-lastBeginTime;
         }
-        return offset
+        offset = offset+latency
+        while(offset < 0){
+            offset = offset+this.currentAudioBuffer.duration
+        }
+        return offset;
     }
     set peerContext(pC){
         this._peerContext = pC

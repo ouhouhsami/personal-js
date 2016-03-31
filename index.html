@@ -1,42 +1,43 @@
 <!doctype html>
-
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal JS</title>
-
+    <title>Personal.JS</title>
     <link rel="stylesheet" type="text/css" href="css/reset.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
-
     <script src="./es6/peer.min.js"></script>
-
-</head>
-
-<body>
+  </head>
+  <body>
     <header>
-        <h1>Personal.JS</h1>
-        <p>
-            Depeche Mode <i>Personal Jesus</i>
-            <br>
-            Collaborative jam session
-            <br>
-            (but use the same browser!)
-        </p>
-        <div id="connect">
-            <input id="peer" />
-            <button id="create">Create</button>
-            <button id="join">Connect</button>
-        </div>
-        <div id="play">
-            <button id="reset">reset</button>
-        </div>
+      <h1>Personal.JS</h1>
+      <p>
+        Depeche Mode <i>Personal Jesus</i>
+        <br>
+        Collaborative jam session
+        <br>
+        (but use the same browser!)
+      </p>
+      <div id="connect">
+        Fill the input field below with a room name.
+        <br>Click on Create button to create the room
+        <br>or Connect button to join one existing room.
+        <input id="peer" />
+        <button id="create">Create</button>
+        <button id="join">Connect</button>
+      </div>
+      <div id="play">
+        <button id="reset">reset</button>
+        <br>
+        (Experimental: on different browsers, add an offset, approximately: Firefox 840ms, Chrome 40ms
+        <input type="input" min="-300" max="300" step="1" value="0" id="latency"/>)
+      </div>
     </header>
     <main>
     </main>
     <footer>
-        A <a href="http://wave.ircam.fr">WAVE</a> and <a href="http://cosima.ircam.fr">CoSiMa</a> experiment
+      A <a href="http://wave.ircam.fr">WAVE</a> and <a href="http://cosima.ircam.fr">CoSiMa</a> experiment
     </footer>
     <script src="bundle.js"></script>
-</body>
+  </body>
 </html>
