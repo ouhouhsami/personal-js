@@ -5,6 +5,8 @@ import { SyncClient } from './SyncClient.js';
 const wavesAudio = require('waves-audio');
 const audioContext = wavesAudio.audioContext;
 
+Object.values = obj => Object.keys(obj).map(key => obj[key]);
+
 // Screens
 const $connectScreen = document.querySelector('#connect');
 const $playScreen = document.querySelector('#play');
@@ -112,7 +114,6 @@ class SamplePlayer {
         source.loop = true;
         source.connect(audioContext.destination);
         source.buffer = this.currentAudioBuffer;
-        console.log("this.offset and latency", this.offset)
         source.start(0, this.offset);
         // pretty display
         let $allSamples = document.querySelectorAll('.sample');
@@ -121,11 +122,12 @@ class SamplePlayer {
         }
         let $target = document.querySelector('.sample-'+padID);
         $target.style["background-color"] = "red";
+        // TODO Send message to connected peers
+        this.peerContext.sendMessage('sample-'+padID);
     }
     get offset(){
         let offset = 0;
         let latency = parseInt($latency.value)/1000;
-        console.log(latency);
         if(this.peerContext.type == 'master'){
             if (!this.syncTimeBegin) {
                 this.syncTimeBegin = audioContext.currentTime;
@@ -157,12 +159,26 @@ class SamplePlayer {
     get peerContext(){
         return this._peerContext;
     }
+    played(id, peerID){
+        // to show peer played samples
+        // get all elements with "played-"+peedID class
+        let $previousPad = document.getElementsByClassName("played-"+peerID);
+        if($previousPad.length > 0){
+            // remove class played and "played-"+peerID
+            $previousPad[0].classList.remove("played");
+            $previousPad[0].classList.remove("played-"+peerID);
+        }
+        let $pad = document.getElementsByClassName(id)[0];
+        $pad.classList.add("played");
+        $pad.classList.add("played-"+peerID);
+    }
 }
 
 class PeerMasterContext {
     constructor(peerID){
         this.shared = {}
         this.shared['connectedPeers'] = {}
+        this.peerID = peerID;
         this.peer = new Peer(peerID, {
             key: 'ubgje3sm5p0evcxr',
             debug: 3,
@@ -225,8 +241,29 @@ class PeerMasterContext {
             // if (data.msg == 'sample:change') {
             //     that.sampleChange(data);
             // }
+            if (data.msg == 'sample:change') {
+                samplePlayer.played(data.args[0], data.args[1])
+                // send update to other peer
+                Object.keys(that.shared['connectedPeers']).forEach(function(key, index) {
+                    if(key !== data.args[1] && key !== that.peerID){
+                        that.shared['connectedPeers'][key].send({
+                            'msg': 'sample:change',
+                            args: [data.args[0], data.args[1]]
+                        })
+                    }
+                });
+            }
         }
 
+    }
+
+    sendMessage(msg){
+        for(let conn of Object.values(this.shared['connectedPeers'])){
+            conn.send({
+                'msg': 'sample:change',
+                args: [msg, this.peerID]
+            });
+        }
     }
 }
 
@@ -248,17 +285,21 @@ class PeerSlaveContext {
         peer.on('error', function(err) {
             console.log(err);
         })
-        conn.on('open', () => {
+        peer.on('open', (id) => {
+            this.peerID = id;
+        })
+        conn.on('open', (id) => {
             this.sync = "slave";
-            this.peerSlaveSync()
+            this.peerSlaveSync(conn);
         });
+
         this.type = "slave";
     }
 
-    peerSlaveSync() {
+    peerSlaveSync(remoteConn) {
         let conn = this.shared['conn'];
         let connectedPeers = this.shared['connectedPeers'];
-        connectedPeers[conn.peer] = 1;
+        connectedPeers[conn.peer] = remoteConn;
 
         conn.send({
             'msg': 'sync:newPeer',
@@ -299,7 +340,16 @@ class PeerSlaveContext {
             this.shared['syncTimeBeginFromMaster'] = syncTimeBeginFromMaster;
         }
         if (data.msg == 'sample:change') {
-            this.sampleChange(data);
+            samplePlayer.played(data.args[0], data.args[1])
+        }
+    }
+
+    sendMessage(msg){
+        for(let conn of Object.values(this.shared['connectedPeers'])){
+            conn.send({
+                'msg': 'sample:change',
+                args: [msg, this.peerID]
+            });
         }
     }
 }

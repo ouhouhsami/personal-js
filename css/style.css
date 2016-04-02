@@ -66,6 +66,10 @@ input[type=button]:hover {
     background-color: #1A1A1A;
 }
 
+.played {
+    border:2px solid yellow;
+}
+
 .samples {
     display: flex;
     flex-wrap: wrap;
