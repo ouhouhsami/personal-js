@@ -5,6 +5,10 @@ import { SyncClient } from './SyncClient.js';
 const wavesAudio = require('waves-audio');
 const audioContext = wavesAudio.audioContext;
 
+// overall output
+let gainNode = audioContext.createGain();
+gainNode.connect(audioContext.destination);
+
 Object.values = obj => Object.keys(obj).map(key => obj[key]);
 
 // Screens
@@ -14,11 +18,14 @@ const $latency = document.querySelector('#latency');
 $connectScreen.style.display = "none";
 $playScreen.style.display = "none";
 
+
+
 // Peer Form fields
 const $peer = document.querySelector('#peer');
 const $createPeerBtn = document.querySelector('#create');
 const $joinPeerBtn = document.querySelector('#join');
 const $resetBtn = document.querySelector('#reset');
+const $muteBtn = document.querySelector('#mute');
 
 let samplePlayer;
 let peerContext;
@@ -84,6 +91,16 @@ $resetBtn.addEventListener('click', ()=>{
     document.location.reload();
 })
 
+$muteBtn.addEventListener('click', ()=>{
+    console.log($muteBtn.checked)
+    if($muteBtn.checked){
+        gainNode.gain.value = 0;
+    }
+    else{
+        gainNode.gain.value = 1;
+    }
+})
+
 class SamplePlayer {
     constructor(samples){
         this.samples = samples;
@@ -101,18 +118,19 @@ class SamplePlayer {
             $pad.addEventListener('click', () => {
                 this.play(i);
             }, false);
-            $playScreen.insertBefore($pad, $resetBtn)
+            $playScreen.insertBefore($pad, $muteBtn)
         }
     }
     play(padID){
         if(this.currentSource){
             this.currentSource.stop();
         }
-        let source = audioContext.createBufferSource()
+        let source = audioContext.createBufferSource();
         this.currentSource = source;
         this.currentAudioBuffer = this.samples[padID];
         source.loop = true;
-        source.connect(audioContext.destination);
+        // source.connect(audioContext.destination);
+        source.connect(gainNode);
         source.buffer = this.currentAudioBuffer;
         source.start(0, this.offset);
         // pretty display
