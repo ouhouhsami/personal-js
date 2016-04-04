@@ -74,7 +74,7 @@ let fsm = StateMachine({
         onPlay: function(options){
             samplePlayer.peerContext = peerContext;
             $playScreen.style.display = "block";
-            samplePlayer.play(0);
+            //samplePlayer.play(0);
             return options;
         }
     }

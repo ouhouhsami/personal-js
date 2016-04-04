@@ -730,7 +730,7 @@ var fsm = StateMachine({
         onPlay: function onPlay(options) {
             samplePlayer.peerContext = peerContext;
             $playScreen.style.display = "block";
-            samplePlayer.play(0);
+            //samplePlayer.play(0);
             return options;
         }
     }
